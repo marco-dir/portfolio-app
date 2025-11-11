@@ -131,17 +131,6 @@ with col4:
         st.session_state.current_period = period
         st.session_state.current_limit = limit
 
-# API Key configuration (hidden if configured in code)
-if not FMP_API_KEY:
-    st.markdown("---")
-    api_key = st.text_input(
-        "API Key FMP",
-        type="password",
-        help="Ottieni la tua API key gratuita su financialmodelingprep.com"
-    )
-else:
-    api_key = FMP_API_KEY
-
 st.markdown("---")
 
 # Funzioni per recuperare i dati
