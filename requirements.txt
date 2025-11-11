@@ -1,22 +1,22 @@
 # Core
-streamlit==1.29.0
-python-dotenv==1.0.0
+streamlit
+python-dotenv
 
 # Database
 psycopg2-binary==2.9.9
 SQLAlchemy==2.0.23
 
 # Data Processing
-pandas>=2.1.4
-numpy>=1.26.2
+pandas
+numpy
 
 # Visualizations
-plotly>=5.18.0
+plotly
 
 # APIs
-requests>=2.31.0
+requests
 anthropic>=0.18.1
-yfinance>=0.2.33
+yfinance
 
 # Utils
-python-dateutil>=2.8.2
+python-dateutil
