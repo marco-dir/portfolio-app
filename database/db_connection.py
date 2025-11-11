@@ -5,7 +5,7 @@ from contextlib import contextmanager
 import streamlit as st
 
 # Database URL da secrets
-DATABASE_URL = st.secrets.get("DATABASE_URL", "")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # Connection pool globale
 _connection_pool = None
