@@ -426,6 +426,7 @@ if st.session_state.analyzed:
     ticker = st.session_state.current_ticker
     period = st.session_state.current_period
     limit = st.session_state.current_limit
+    api_key = FMP_API_KEY
     
     if not api_key:
         st.error("⚠️ Inserisci la tua API Key FMP o configurala nel codice")
