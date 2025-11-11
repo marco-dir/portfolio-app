@@ -6,8 +6,8 @@ import os
 
 # Config
 WORDPRESS_URL = os.getenv("WORDPRESS_URL", "https://tuosito.com")
-MP_CONSUMER_KEY = st.secrets.get("MP_CONSUMER_KEY", "")
-MP_CONSUMER_SECRET = st.secrets.get("MP_CONSUMER_SECRET", "")
+MP_CONSUMER_KEY = os.getenv("MP_CONSUMER_KEY", "")
+MP_CONSUMER_SECRET = os.getenv("MP_CONSUMER_SECRET", "")
 
 
 def authenticate_wordpress(username, password):
