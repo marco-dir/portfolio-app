@@ -2089,11 +2089,6 @@ else:
 
 # ... TUTTO IL TUO CODICE ...
 
-def show(user_id):
-    """
-    Mostra pagina analisi titoli.
-    Integra con bottone "Aggiungi al Portafoglio".
-    """
     
     # IL TUO CODICE ESISTENTE COMPLETO
     # Ma alla fine, dopo l'analisi, aggiungi:
