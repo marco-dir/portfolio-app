@@ -2,9 +2,10 @@ import streamlit as st
 import requests
 from requests.auth import HTTPBasicAuth
 from database.users import sync_user_from_wordpress, get_user_by_id
+import os
 
 # Config
-WORDPRESS_URL = st.secrets.get("WORDPRESS_URL", "https://tuosito.com")
+WORDPRESS_URL = os.getenv("WORDPRESS_URL", "https://tuosito.com")
 MP_CONSUMER_KEY = st.secrets.get("MP_CONSUMER_KEY", "")
 MP_CONSUMER_SECRET = st.secrets.get("MP_CONSUMER_SECRET", "")
 
