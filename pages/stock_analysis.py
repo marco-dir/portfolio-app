@@ -419,6 +419,11 @@ def show(user_id):
     Mostra pagina analisi titoli.
     Integra con bottone "Aggiungi al Portafoglio".
     """
+    
+    # ⚠️ AGGIUNGI QUESTO CONTROLLO SUBITO ALL'INIZIO ⚠️
+    if not user_id or user_id == 'guest':
+        st.warning("⚠️ Effettua il login per salvare i titoli nei tuoi portafogli")
+        st.info("💡 Puoi comunque utilizzare l'analisi, ma non potrai salvare nei portafogli")
 
 # Main logic
 if st.session_state.analyzed:
@@ -2007,19 +2012,31 @@ if st.session_state.analyzed:
                         else:
                             st.warning("⚠️ Nessuno storico dividendi disponibile")
                             st.info("💡 Possibili cause:\n- L'azienda non paga dividendi\n- Il piano API gratuito potrebbe avere limitazioni\n- Prova con un ticker che paga dividendi (es. KO, JNJ, PG)")
- # SEZIONE AGGIUNTA: Aggiungi al Portafoglio
-    if st.session_state.get('analyzed', False):
-        ticker = st.session_state.current_ticker
-        
-        st.markdown("---")
-        st.markdown("### ➕ Aggiungi al Portafoglio")
-        
+
+    # SEZIONE AGGIUNTA: Aggiungi al Portafoglio
+    # SEZIONE AGGIUNTA: Aggiungi al Portafoglio
+if st.session_state.get('analyzed', False):
+    ticker = st.session_state.current_ticker
+    
+    st.markdown("---")
+    st.markdown("### ➕ Aggiungi al Portafoglio")
+    
+    # Controlla autenticazione
+    if not user_id or user_id == 'guest':
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.warning("🔒 Effettua il login per aggiungere titoli ai portafogli")
+            st.info("👉 Vai alla pagina **Login** per accedere o registrarti")
+        with col2:
+            if st.button("🔐 Vai al Login", type="primary"):
+                st.switch_page("pages/login.py")  # Modifica con il nome corretto della tua pagina login
+    else:
         from database.portfolios import get_user_portfolios, add_position
         
         portfolios = get_user_portfolios(user_id)
         
         if not portfolios:
-            st.info("Crea prima un portafoglio nella sezione '📊 I Miei Portafogli'")
+            st.info("📁 Crea prima un portafoglio nella sezione '📊 I Miei Portafogli'")
         else:
             with st.form(f"add_to_portfolio_{ticker}"):
                 portfolio_names = {p['portfolio_name']: p['id'] for p in portfolios}
@@ -2061,6 +2078,8 @@ if st.session_state.analyzed:
                         
                         st.success(f"✅ {ticker} aggiunto a {selected_portfolio}!")
                         st.balloons()
+                    else:
+                        st.error("⚠️ Inserisci valori validi per azioni e prezzo")
 
 else:
     # Schermata iniziale
