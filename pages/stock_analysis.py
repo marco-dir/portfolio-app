@@ -55,6 +55,14 @@ hide_all_anchor_links = """
 st.markdown(hide_all_anchor_links, unsafe_allow_html=True)
 
 # ============================================
+# RECUPERA USER_ID DAL SESSION STATE
+# ============================================
+if 'user_id' not in st.session_state:
+    st.session_state.user_id = None
+
+user_id = st.session_state.get('user_id')
+
+# ============================================
 # INIZIALIZZAZIONE SESSION STATE
 # ============================================
 if 'analyzed' not in st.session_state:
