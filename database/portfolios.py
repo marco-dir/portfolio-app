@@ -132,3 +132,44 @@ def add_transaction(portfolio_id, ticker, tx_type, shares, price, currency, tx_d
         portfolio_id, ticker.upper(), tx_type, shares, price,
         currency, tx_date or date.today(), fees, notes
     ), fetch=False)
+
+def delete_portfolio(portfolio_id):
+    """
+    Elimina un portafoglio e tutte le sue posizioni.
+    
+    Args:
+        portfolio_id: ID del portafoglio da eliminare
+        
+    Returns:
+        bool: True se eliminato con successo, False altrimenti
+    """
+    conn = get_db_connection()
+    if not conn:
+        return False
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Elimina prima tutte le posizioni associate al portafoglio
+        cursor.execute("""
+            DELETE FROM positions 
+            WHERE portfolio_id = %s
+        """, (portfolio_id,))
+        
+        # Poi elimina il portafoglio
+        cursor.execute("""
+            DELETE FROM portfolios 
+            WHERE id = %s
+        """, (portfolio_id,))
+        
+        conn.commit()
+        return True
+        
+    except Exception as e:
+        print(f"Errore eliminazione portafoglio: {e}")
+        conn.rollback()
+        return False
+        
+    finally:
+        cursor.close()
+        conn.close()
