@@ -1,7 +1,8 @@
 from database.db_connection import execute_query
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import yfinance as yf
+import json
 
 
 def get_current_prices(tickers):
@@ -26,14 +27,22 @@ def calculate_portfolio_performance(portfolio_id):
     """
     # Ottieni posizioni
     query = """
-        SELECT ticker, shares, avg_price, currency
+        SELECT ticker, shares, avg_price, currency, company_name, sector
         FROM positions
         WHERE portfolio_id = %s
     """
     positions = execute_query(query, (portfolio_id,))
     
     if not positions:
-        return None
+        return {
+            'total_cost': 0,
+            'current_value': 0,
+            'gain_loss': 0,
+            'gain_loss_pct': 0,
+            'positions': [],
+            'current_prices': {},
+            'positions_performance': []
+        }
     
     # Ottieni prezzi correnti
     tickers = [p['ticker'] for p in positions]
@@ -42,6 +51,7 @@ def calculate_portfolio_performance(portfolio_id):
     # Calcola metriche
     total_cost = 0
     current_value = 0
+    positions_performance = []
     
     for pos in positions:
         ticker = pos['ticker']
@@ -49,8 +59,31 @@ def calculate_portfolio_performance(portfolio_id):
         avg_price = float(pos['avg_price'])
         current_price = current_prices.get(ticker, 0)
         
-        total_cost += shares * avg_price
-        current_value += shares * current_price
+        position_cost = shares * avg_price
+        position_value = shares * current_price
+        position_gain_loss = position_value - position_cost
+        position_gain_loss_pct = (position_gain_loss / position_cost * 100) if position_cost > 0 else 0
+        
+        total_cost += position_cost
+        current_value += position_value
+        
+        positions_performance.append({
+            'ticker': ticker,
+            'company_name': pos.get('company_name'),
+            'sector': pos.get('sector'),
+            'shares': shares,
+            'avg_price': avg_price,
+            'current_price': current_price,
+            'invested': position_cost,
+            'current_value': position_value,
+            'gain_loss': position_gain_loss,
+            'gain_loss_pct': position_gain_loss_pct,
+            'weight': 0  # Calcolato dopo
+        })
+    
+    # Calcola i pesi
+    for perf in positions_performance:
+        perf['weight'] = (perf['current_value'] / current_value * 100) if current_value > 0 else 0
     
     gain_loss = current_value - total_cost
     gain_loss_pct = (gain_loss / total_cost * 100) if total_cost > 0 else 0
@@ -61,17 +94,103 @@ def calculate_portfolio_performance(portfolio_id):
         'gain_loss': gain_loss,
         'gain_loss_pct': gain_loss_pct,
         'positions': positions,
-        'current_prices': current_prices
+        'current_prices': current_prices,
+        'positions_performance': positions_performance,
+        'total_invested': total_cost,  # Alias per compatibilità
+        'total_gain_loss': gain_loss,  # Alias per compatibilità
+        'total_gain_loss_pct': gain_loss_pct  # Alias per compatibilità
     }
+
+
+def save_analysis(portfolio_id, analysis_data, analysis_type='snapshot'):
+    """
+    Salva un'analisi del portafoglio nel database.
+    
+    Args:
+        portfolio_id: ID del portafoglio
+        analysis_data: Dizionario con i dati dell'analisi
+        analysis_type: Tipo di analisi (default: 'snapshot')
+        
+    Returns:
+        int: ID dell'analisi salvata o None se errore
+    """
+    try:
+        # Converti analysis_data in JSON se non lo è già
+        if isinstance(analysis_data, dict):
+            analysis_json = json.dumps(analysis_data, default=str)
+        else:
+            analysis_json = analysis_data
+        
+        query = """
+            INSERT INTO portfolio_analyses 
+            (portfolio_id, analysis_type, analysis_data, created_at)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+        """
+        
+        result = execute_query(
+            query, 
+            (portfolio_id, analysis_type, analysis_json, datetime.now()),
+            fetch=True
+        )
+        
+        if result:
+            return result[0]['id']
+        return None
+        
+    except Exception as e:
+        print(f"Errore salvataggio analisi: {e}")
+        return None
+
+
+def get_portfolio_analyses(portfolio_id, limit=10):
+    """
+    Recupera le analisi storiche di un portafoglio.
+    
+    Args:
+        portfolio_id: ID del portafoglio
+        limit: Numero massimo di analisi da recuperare
+        
+    Returns:
+        list: Lista di dizionari con le analisi
+    """
+    try:
+        query = """
+            SELECT id, portfolio_id, analysis_type, analysis_data, created_at
+            FROM portfolio_analyses
+            WHERE portfolio_id = %s
+            ORDER BY created_at DESC
+            LIMIT %s
+        """
+        
+        analyses = execute_query(query, (portfolio_id, limit))
+        
+        if not analyses:
+            return []
+        
+        # Converti JSON string in dict
+        result = []
+        for analysis in analyses:
+            analysis_dict = dict(analysis)
+            if isinstance(analysis_dict['analysis_data'], str):
+                try:
+                    analysis_dict['analysis_data'] = json.loads(analysis_dict['analysis_data'])
+                except:
+                    pass
+            result.append(analysis_dict)
+        
+        return result
+        
+    except Exception as e:
+        print(f"Errore recupero analisi: {e}")
+        return []
 
 
 def save_portfolio_snapshot(portfolio_id):
     """Salva snapshot giornaliero del portafoglio."""
-    from datetime import date
-    
     perf = calculate_portfolio_performance(portfolio_id)
     
-    if not perf:
+    if not perf or perf['total_cost'] == 0:
         return
     
     query = """
@@ -154,6 +273,96 @@ def get_position_pl(portfolio_id, ticker):
         'gain_loss': (current_price - avg_price) * shares,
         'gain_loss_pct': ((current_price - avg_price) / avg_price * 100) if avg_price > 0 else 0,
         'transactions': transactions
+    }
+
+
+def delete_analysis(analysis_id):
+    """
+    Elimina un'analisi specifica.
+    
+    Args:
+        analysis_id: ID dell'analisi da eliminare
+        
+    Returns:
+        bool: True se eliminata con successo, False altrimenti
+    """
+    try:
+        query = """
+            DELETE FROM portfolio_analyses 
+            WHERE id = %s
+        """
+        execute_query(query, (analysis_id,), fetch=False)
+        return True
+        
+    except Exception as e:
+        print(f"Errore eliminazione analisi: {e}")
+        return False
+
+
+def calculate_portfolio_metrics(positions_performance):
+    """
+    Calcola metriche aggiuntive del portafoglio.
+    
+    Args:
+        positions_performance: Lista delle performance delle singole posizioni
+        
+    Returns:
+        dict: Dizionario con metriche aggregate
+    """
+    if not positions_performance:
+        return {
+            'best_performer': None,
+            'worst_performer': None,
+            'avg_gain_loss_pct': 0,
+            'positive_positions': 0,
+            'negative_positions': 0,
+            'sectors_allocation': {},
+            'total_positions': 0
+        }
+    
+    # Ordina per performance
+    sorted_positions = sorted(positions_performance, 
+                             key=lambda x: x['gain_loss_pct'], 
+                             reverse=True)
+    
+    best_performer = sorted_positions[0] if sorted_positions else None
+    worst_performer = sorted_positions[-1] if sorted_positions else None
+    
+    # Calcola media
+    avg_gain_loss_pct = sum(p['gain_loss_pct'] for p in positions_performance) / len(positions_performance)
+    
+    # Conta posizioni positive/negative
+    positive_positions = sum(1 for p in positions_performance if p['gain_loss'] > 0)
+    negative_positions = sum(1 for p in positions_performance if p['gain_loss'] < 0)
+    
+    # Calcola allocazione per settore
+    sectors_allocation = {}
+    for pos in positions_performance:
+        sector = pos.get('sector', 'Unknown')
+        if sector not in sectors_allocation:
+            sectors_allocation[sector] = {
+                'value': 0,
+                'weight': 0,
+                'positions': 0
+            }
+        sectors_allocation[sector]['value'] += pos['current_value']
+        sectors_allocation[sector]['positions'] += 1
+    
+    # Calcola pesi settoriali
+    total_value = sum(p['current_value'] for p in positions_performance)
+    for sector in sectors_allocation:
+        sectors_allocation[sector]['weight'] = (
+            sectors_allocation[sector]['value'] / total_value * 100
+        ) if total_value > 0 else 0
+    
+    return {
+        'best_performer': best_performer,
+        'worst_performer': worst_performer,
+        'avg_gain_loss_pct': avg_gain_loss_pct,
+        'positive_positions': positive_positions,
+        'negative_positions': negative_positions,
+        'total_positions': len(positions_performance),
+        'sectors_allocation': sectors_allocation
     }
 
 
