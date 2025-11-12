@@ -159,11 +159,13 @@ def check_membership_by_email(email):
 # UI - PAGINA LOGIN
 # ========================================
 
-def show_login_page():
-    """Mostra la pagina di login con form email."""
+✅ Ecco il codice con il form più stretto e centrato
+Modifico solo la sezione del form di login in auth.py:
+pythondef show_login_page():
+    """Mostra la pagina di login con form email centrato e stretto."""
     
     # Header
-    st.title("🔐 DIRAMCO Financial Platform")
+    st.title("Analisi Finanziaria Avanzata e Portafoglio IA")
     
     col1, col2 = st.columns([2, 1])
     
@@ -178,155 +180,165 @@ def show_login_page():
         st.info("""
         **Serve aiuto?**
         
-        📧 support@tuosito.com
-        📚 [Guida](https://tuosito.com/guida)
+        info@diramco.com
+        [Guida](https://diramco.com/guida)
         """)
     
     st.markdown("---")
     
     # Tabs
-    tab1, tab2 = st.tabs(["🔑 Accedi", "ℹ️ Informazioni"])
+    tab1, tab2 = st.tabs([" Accedi", " Informazioni"])
     
     with tab1:
-        # Form di login
-        with st.form("email_login_form", clear_on_submit=False):
-            st.markdown("#### Inserisci la tua email")
-            
-            email = st.text_input(
-                "Email",
-                placeholder="tuaemail@esempio.com",
-                help="L'email usata per registrarti e attivare la membership",
-                key="login_email_input"
-            )
-            
-            st.markdown("---")
-            
-            submit = st.form_submit_button(
-                "🚀 Accedi",
-                use_container_width=True,
-                type="primary"
-            )
-            
-            if submit:
-                # Validazione email
-                if not email:
-                    st.error("⚠️ Inserisci la tua email")
-                    return
+        # ========================================
+        # FORM CENTRATO E STRETTO
+        # ========================================
+        
+        # Crea colonne per centrare il form
+        # [spazio vuoto] [form] [spazio vuoto]
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+        
+        with col_center:
+            # Form di login
+            with st.form("email_login_form", clear_on_submit=False):
+                st.markdown("#### Inserisci la tua email")
                 
-                if '@' not in email or '.' not in email.split('@')[1]:
-                    st.error("⚠️ Inserisci un'email valida (es. nome@dominio.com)")
-                    return
+                email = st.text_input(
+                    "Email",
+                    placeholder="tuaemail@esempio.com",
+                    help="L'email usata per registrarti e attivare la membership",
+                    key="login_email_input",
+                    label_visibility="collapsed"  # Nasconde label ripetuta
+                )
                 
-                # Normalizza email (lowercase e trim)
-                email = email.strip().lower()
+                st.markdown("")  # Spazio
                 
-                # Verifica membership
-                with st.spinner("🔍 Verifica membership in corso..."):
-                    result = check_membership_by_email(email)
-                    
-                    # Errore durante la verifica
-                    if result is None:
-                        st.error("❌ Errore durante la verifica. Riprova tra poco.")
-                        return
-                    
-                    # Email non trovata
-                    if not result.get('found'):
-                        st.error("❌ Email non trovata nel sistema")
-                        st.warning("""
-                        **Non hai ancora un account?**
-                        
-                        Per accedere alla piattaforma devi prima:
-                        1. Registrarti su WordPress
-                        2. Attivare una membership
-                        """)
-                        st.markdown("""
-                        <a href="https://tuosito.com/membership" target="_blank">
-                            <button style="background-color: #0066cc; color: white; 
-                            padding: 12px 24px; border: none; border-radius: 5px; 
-                            cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
-                                📝 Registrati e Attiva Membership
-                            </button>
-                        </a>
-                        """, unsafe_allow_html=True)
-                        return
-                    
-                    # Membership non attiva
-                    if not result.get('has_active'):
-                        msg = result.get('message', 'Membership non attiva')
-                        st.error(f"❌ {msg}")
-                        
-                        st.warning("""
-                        **La tua membership non è attiva**
-                        
-                        Per accedere alla piattaforma devi avere una membership attiva.
-                        
-                        Possibili motivi:
-                        - Membership scaduta
-                        - Pagamento non completato
-                        - Subscription cancellata
-                        
-                        Verifica lo stato della tua membership su WordPress o rinnovala.
-                        """)
-                        
-                        st.markdown("""
-                        <a href="https://tuosito.com/membership" target="_blank">
-                            <button style="background-color: #FF4B4B; color: white; 
-                            padding: 12px 24px; border: none; border-radius: 5px; 
-                            cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
-                                🎯 Verifica o Rinnova Membership
-                            </button>
-                        </a>
-                        """, unsafe_allow_html=True)
-                        return
-                    
-                    # ✅ ACCESSO CONSENTITO!
-                    user_data = result['user']
-                    membership = result['membership']
-                    
-                    st.success(f"✅ Benvenuto **{user_data['name']}**!")
-                    st.success(f"🎫 Membership attiva: **{membership['membership_name']}**")
-                    
-                    # Mostra info scadenza
-                    expires = membership.get('expires_at', 'Mai')
-                    if expires != 'Mai':
-                        st.info(f"📅 La tua membership scade il: {expires}")
-                    else:
-                        st.info("📅 Hai una membership a vita - Nessuna scadenza!")
+                submit = st.form_submit_button(
+                    "Accedi",
+                    use_container_width=True,
+                    type="primary"
+                )
                 
-                # Sincronizza database locale
-                with st.spinner("💾 Caricamento dati utente..."):
-                    try:
-                        # Salva/aggiorna utente nel database locale
-                        local_user_id = sync_user_from_wordpress(user_data, membership)
+                if submit:
+                    # Validazione email
+                    if not email:
+                        st.error("⚠️ Inserisci la tua email")
+                        st.stop()
+                    
+                    if '@' not in email or '.' not in email.split('@')[1]:
+                        st.error("⚠️ Inserisci un'email valida (es. nome@dominio.com)")
+                        st.stop()
+                    
+                    # Normalizza email (lowercase e trim)
+                    email = email.strip().lower()
+                    
+                    # Verifica membership
+                    with st.spinner("🔍 Verifica membership in corso..."):
+                        result = check_membership_by_email(email)
                         
-                        # Salva nella sessione
-                        st.session_state.authenticated = True
-                        st.session_state.user_id = local_user_id
-                        st.session_state.user_data = user_data
-                        st.session_state.membership = membership
-                        st.session_state.last_check = datetime.now().timestamp()
-                        st.session_state.login_email = email
+                        # Errore durante la verifica
+                        if result is None:
+                            st.error("❌ Errore durante la verifica. Riprova tra poco.")
+                            st.stop()
                         
-                        st.success("✅ Accesso completato con successo!")
-                        st.balloons()
+                        # Email non trovata
+                        if not result.get('found'):
+                            st.error("❌ Email non trovata nel sistema")
+                            st.warning("""
+                            **Non hai ancora un account?**
+                            
+                            Per accedere alla piattaforma devi prima:
+                            1. Registrarti su WordPress
+                            2. Attivare una membership
+                            """)
+                            st.markdown("""
+                            <a href="https://tuosito.com/membership" target="_blank">
+                                <button style="background-color: #0066cc; color: white; 
+                                padding: 12px 24px; border: none; border-radius: 5px; 
+                                cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
+                                     Registrati e Attiva Membership
+                                </button>
+                            </a>
+                            """, unsafe_allow_html=True)
+                            st.stop()
                         
-                        # Attendi 1 secondo prima di ricaricare
-                        import time
-                        time.sleep(1)
-                        st.rerun()
+                        # Membership non attiva
+                        if not result.get('has_active'):
+                            msg = result.get('message', 'Membership non attiva')
+                            st.error(f"❌ {msg}")
+                            
+                            st.warning("""
+                            **La tua membership non è attiva**
+                            
+                            Per accedere alla piattaforma devi avere una membership attiva.
+                            
+                            Possibili motivi:
+                            - Membership scaduta
+                            - Pagamento non completato
+                            - Subscription cancellata
+                            
+                            Verifica lo stato della tua membership su WordPress o rinnovala.
+                            """)
+                            
+                            st.markdown("""
+                            <a href="https://tuosito.com/membership" target="_blank">
+                                <button style="background-color: #FF4B4B; color: white; 
+                                padding: 12px 24px; border: none; border-radius: 5px; 
+                                cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
+                                    🎯 Verifica o Rinnova Membership
+                                </button>
+                            </a>
+                            """, unsafe_allow_html=True)
+                            st.stop()
                         
-                    except Exception as e:
-                        st.error(f"❌ Errore durante il salvataggio dati: {e}")
-                        st.warning("Contatta il supporto se il problema persiste.")
-                        return
+                        # ✅ ACCESSO CONSENTITO!
+                        user_data = result['user']
+                        membership = result['membership']
+                        
+                        st.success(f"✅ Benvenuto **{user_data['name']}**!")
+                        st.success(f"🎫 Membership attiva: **{membership['membership_name']}**")
+                        
+                        # Mostra info scadenza
+                        expires = membership.get('expires_at', 'Mai')
+                        if expires != 'Mai':
+                            st.info(f"📅 La tua membership scade il: {expires}")
+                        else:
+                            st.info("📅 Hai una membership a vita - Nessuna scadenza!")
+                    
+                    # Sincronizza database locale
+                    with st.spinner(" Caricamento dati utente..."):
+                        try:
+                            # Salva/aggiorna utente nel database locale
+                            local_user_id = sync_user_from_wordpress(user_data, membership)
+                            
+                            # Salva nella sessione
+                            st.session_state.authenticated = True
+                            st.session_state.user_id = local_user_id
+                            st.session_state.user_data = user_data
+                            st.session_state.membership = membership
+                            st.session_state.last_check = datetime.now().timestamp()
+                            st.session_state.login_email = email
+                            
+                            st.success("✅ Accesso completato con successo!")
+                            st.balloons()
+                            
+                            # Attendi 1 secondo prima di ricaricare
+                            import time
+                            time.sleep(1)
+                            st.rerun()
+                            
+                        except Exception as e:
+                            st.error(f"❌ Errore durante il salvataggio dati: {e}")
+                            st.warning("Contatta il supporto se il problema persiste.")
+                            st.stop()
     
     with tab2:
         st.markdown("""
-        ### 📖 Come Funziona l'Accesso
+        ### Come Funziona l'Accesso
         
         Il nostro sistema di accesso è **semplice e sicuro**:
         
-        #### 🔄 Processo di Login
+        #### Processo di Login
         
         1. **Inserisci la tua email**  
            L'email che hai usato per registrarti su WordPress
@@ -398,7 +410,7 @@ def show_login_page():
         
         ---
         
-        ### 💳 Gestione Membership
+        ### Gestione Membership
         
         **Dove gestisco la mia membership?**  
         Accedi al tuo account WordPress:  
@@ -416,9 +428,9 @@ def show_login_page():
         
         Hai ancora problemi o domande?
         
-        📧 **Email:** support@tuosito.com  
-        🌐 **Web:** [tuosito.com/supporto](https://tuosito.com/supporto)  
-        📱 **Orari:** Lun-Ven 9:00-18:00
+         **Email:** support@tuosito.com  
+         **Web:** [tuosito.com/supporto](https://tuosito.com/supporto)  
+         **Orari:** Lun-Ven 9:00-18:00
         
         Il nostro team è sempre pronto ad aiutarti! 💪
         """)
