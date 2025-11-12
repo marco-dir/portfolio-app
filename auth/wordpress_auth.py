@@ -159,9 +159,7 @@ def check_membership_by_email(email):
 # UI - PAGINA LOGIN
 # ========================================
 
-✅ Ecco il codice con il form più stretto e centrato
-Modifico solo la sezione del form di login in auth.py:
-pythondef show_login_page():
+def show_login_page():
     """Mostra la pagina di login con form email centrato e stretto."""
     
     # Header
