@@ -98,27 +98,27 @@ def main():
     
     # ROUTING PAGINE
     if page == "🔍 Analisi Titoli":
-        from pages import stock_analysis
+        from modules import stock_analysis
         stock_analysis.show(user['id'])
         
     elif page == "📊 I Miei Portafogli":
-        from pages import portfolio
+        from modules import portfolio
         portfolio.show(user['id'])
         
     elif page == "📈 Performance & P/L":
-        from pages import performance
+        from modules import performance
         performance.show(user['id'])
         
     elif page == "🤖 Analisi AI":
-        from pages import portfolio_analysis
+        from modules import portfolio_analysis
         portfolio_analysis.show(user['id'])
         
     elif page == "⭐ Watchlist":
-        from pages import watchlist
+        from modules import watchlist
         watchlist.show(user['id'])
         
     elif page == "🔔 Alert":
-        from pages import alerts_page
+        from modules import alerts_page
         alerts_page.show(user['id'])
 
 
