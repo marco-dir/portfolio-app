@@ -15,13 +15,13 @@ MP_CONSUMER_SECRET = os.getenv("MP_CONSUMER_SECRET", "")
 
 def check_membership_by_email(email):
     """
-    Verifica se l'email ha una membership attiva.
+    Verifica se l'email ha un abbonamento attivo.
     
     Args:
         email (str): Email dell'utente
         
     Returns:
-        dict: Risultato della verifica con dati utente e membership
+        dict: Risultato della verifica con dati utente e abbonamento
     """
     try:
         # STEP 1: Cerca membro per email
@@ -160,8 +160,7 @@ def check_membership_by_email(email):
 # ========================================
 
 def show_login_page():
-    """Mostra la pagina di login con form email centrato e stretto."""
-    
+        
     # Header
     st.title("Analisi Finanziaria Avanzata e Portafoglio IA")
     
@@ -169,9 +168,9 @@ def show_login_page():
     
     with col1:
         st.markdown("""
-        ### Accesso Riservato ai Membri
+        ### Accesso Riservato agli Abbonati
         
-        Inserisci l'email associata alla tua membership per accedere immediatamente alla piattaforma.
+        Inserisci l'email associata al tuo Abbonamento Premium per accedere immediatamente alla piattaforma.
         """)
     
     with col2:
@@ -204,7 +203,7 @@ def show_login_page():
                 email = st.text_input(
                     "Email",
                     placeholder="tuaemail@esempio.com",
-                    help="L'email usata per registrarti e attivare la membership",
+                    help="L'email usata per registrarti e attivare l'Abbonamento Premium",
                     key="login_email_input",
                     label_visibility="collapsed"  # Nasconde label ripetuta
                 )
@@ -231,7 +230,7 @@ def show_login_page():
                     email = email.strip().lower()
                     
                     # Verifica membership
-                    with st.spinner("🔍 Verifica membership in corso..."):
+                    with st.spinner("🔍 Verifica abbonamento in corso..."):
                         result = check_membership_by_email(email)
                         
                         # Errore durante la verifica
@@ -246,15 +245,15 @@ def show_login_page():
                             **Non hai ancora un account?**
                             
                             Per accedere alla piattaforma devi prima:
-                            1. Registrarti su WordPress
-                            2. Attivare una membership
+                            1. Registrarti su diramco.com
+                            2. Attivare un Abbonamento Premium
                             """)
                             st.markdown("""
                             <a href="https://tuosito.com/membership" target="_blank">
                                 <button style="background-color: #0066cc; color: white; 
                                 padding: 12px 24px; border: none; border-radius: 5px; 
                                 cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
-                                     Registrati e Attiva Membership
+                                     Registrati e Attiva Abbonamento Premium
                                 </button>
                             </a>
                             """, unsafe_allow_html=True)
@@ -262,20 +261,20 @@ def show_login_page():
                         
                         # Membership non attiva
                         if not result.get('has_active'):
-                            msg = result.get('message', 'Membership non attiva')
+                            msg = result.get('message', 'Abbonamento non attivo')
                             st.error(f"❌ {msg}")
                             
                             st.warning("""
-                            **La tua membership non è attiva**
+                            **Il tuo Abbonamento non è attivo**
                             
                             Per accedere alla piattaforma devi avere una membership attiva.
                             
                             Possibili motivi:
-                            - Membership scaduta
+                            - Abbonamento scaduto
                             - Pagamento non completato
                             - Subscription cancellata
                             
-                            Verifica lo stato della tua membership su WordPress o rinnovala.
+                            Verifica lo stato del tuo Abbonamento su diramco.com o rinnovalo.
                             """)
                             
                             st.markdown("""
@@ -283,7 +282,7 @@ def show_login_page():
                                 <button style="background-color: #FF4B4B; color: white; 
                                 padding: 12px 24px; border: none; border-radius: 5px; 
                                 cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px;">
-                                    🎯 Verifica o Rinnova Membership
+                                    Verifica o Rinnova Abbonamento
                                 </button>
                             </a>
                             """, unsafe_allow_html=True)
@@ -339,40 +338,39 @@ def show_login_page():
         #### Processo di Login
         
         1. **Inserisci la tua email**  
-           L'email che hai usato per registrarti su WordPress
+           L'email che hai usato per registrarti su diramco.com
         
         2. **Verifica automatica**  
-           Il sistema controlla se hai una membership MemberPress attiva
+           Il sistema controlla se hai un Abbonamento attivo
         
         3. **Accesso immediato**  
            Se tutto è OK, entri subito nella piattaforma!
         
         ---
         
-        ### 🔒 Sicurezza e Privacy
+        ### Sicurezza e Privacy
         
         **Come proteggiamo il tuo account:**
         
-        - ✅ Ogni accesso viene verificato in tempo reale con WordPress
+        - ✅ Ogni accesso viene verificato in tempo reale con diramco.com
         - ✅ La sessione viene ricontrollata automaticamente ogni 30 minuti
         - ✅ Se la membership scade, l'accesso viene revocato immediatamente
         - ✅ Non salviamo password - solo email e dati pubblici del profilo
         - ✅ Connessione sicura HTTPS
-        - ✅ API protette con chiavi criptate
         
         **Privacy:**
-        - Usiamo solo i dati necessari (nome, email, stato membership)
+        - Usiamo solo i dati necessari (nome, email, stato abbonamento)
         - Non condividiamo i tuoi dati con terze parti
         - Puoi richiedere la cancellazione dei dati in qualsiasi momento
         
         ---
         
-        ### ✅ Requisiti per Accedere
+        ### Requisiti per Accedere
         
         Per accedere alla piattaforma devi avere:
         
-        - ✅ Account WordPress registrato su tuosito.com
-        - ✅ Membership MemberPress attiva e valida
+        - ✅ Account registrato su diramco.com
+        - ✅ Abbonamento Premium attivo e valido
         - ✅ Email verificata e confermata
         
         ---
